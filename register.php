@@ -1,31 +1,32 @@
 <?php
 include 'db.php';
+session_start(); // Start session for login tracking
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['register'])) {
         // Registration logic
-        $name = $_POST['name'];
-        $student_id = $_POST['student_id'];
-        $email = $_POST['email'];
-        $course = $_POST['course'];
-        $password = password_hash($_POST['password'], PASSWORD_BCRYPT); // Hash the password
+        $name = trim($_POST['name']);
+        $student_id = trim($_POST['student_id']);
+        $email = trim($_POST['email']);
+        $course = trim($_POST['course']);
+        $password = password_hash(trim($_POST['password']), PASSWORD_BCRYPT); // Hash the password
 
         // Check if email or student_id already exists
         $stmt = $conn->prepare("SELECT * FROM students WHERE email = ? OR student_id = ?");
         $stmt->execute([$email, $student_id]);
         if ($stmt->rowCount() > 0) {
-            echo "Email or Student ID already exists!";
+            echo "<p style='color: red;'>Email or Student ID already exists!</p>";
         } else {
             // Insert the new student
             $stmt = $conn->prepare("INSERT INTO students (name, student_id, email, course, password) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute([$name, $student_id, $email, $course, $password]);
 
-            echo "Student registered successfully!";
+            echo "<p style='color: green;'>Student registered successfully!</p>";
         }
     } elseif (isset($_POST['login'])) {
         // Login logic
-        $student_id = $_POST['student_id'];
-        $password = $_POST['password'];
+        $student_id = trim($_POST['student_id']);
+        $password = trim($_POST['password']);
 
         // Check if student_id exists
         $stmt = $conn->prepare("SELECT * FROM students WHERE student_id = ?");
@@ -33,9 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $student = $stmt->fetch();
 
         if ($student && password_verify($password, $student['password'])) {
-            echo "Login successful! Welcome, " . htmlspecialchars($student['name']) . ".";
+            // Store student details in session
+            $_SESSION['student_id'] = $student['student_id'];
+            $_SESSION['name'] = $student['name'];
+            $_SESSION['course'] = $student['course'];
+
+            // Redirect to payment.php
+            header("Location: payment.php");
+            exit();
         } else {
-            echo "Invalid Student ID or Password!";
+            echo "<p style='color: red;'>Invalid Student ID or Password!</p>";
         }
     }
 }

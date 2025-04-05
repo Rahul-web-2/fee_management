@@ -4,8 +4,8 @@ include 'db.php';
 
 use Razorpay\Api\Api;
 
-$api_key = 'YOUR_API_KEY'; // Replace with your Razorpay API key
-$api_secret = 'YOUR_API_SECRET'; // Replace with your Razorpay API secret
+$api_key = 'YOUR API KEU'; // Replace with your Razorpay API key
+$api_secret = 'YOUR SECRET API KEY'; // Replace with your Razorpay API secret
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $student_id = $_POST['student_id'];
